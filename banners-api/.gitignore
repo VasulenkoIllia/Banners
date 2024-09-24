@@ -1,35 +1,51 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Compiled output
-/dist
-/tmp
-/out-tsc
-/bazel-out
+# Logs
+logs/
+*.log
 
-# Node
-/node_modules
-npm-debug.log
-yarn-error.log
+# Dependency directories
+jspm_packages/
 
-# IDEs and editors
+# Build directories
+dist/
+build/
+coverage/
+.tmp/
+
+# IDE directories
 .idea/
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 
-
-# Miscellaneous
-/.angular/cache
-.sass-cache/
-/connect.lock
-/coverage
-/libpeerconnection.log
-testem.log
-/typings
-
-# System files
+# Operating system files
 .DS_Store
 Thumbs.db
+
+# Package manager files
+package-lock.json
+yarn.lock
+
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.Python
+env/
+venv/
+pip-log.txt
+
+# macOS
+*.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
