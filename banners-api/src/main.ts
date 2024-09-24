@@ -10,7 +10,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors({
-    origin: ['http://localhost:5174'],
+    origin: ['http://localhost:5173'],
   });
   const swagger: SwaggerInfrastucture = new SwaggerInfrastucture();
   swagger.initialize(app);
