@@ -51,7 +51,7 @@ export default function AppLayout() {
                 </div>
 
                 <div className={'flex gap-4'}>
-                    {menuItems.map((item, i) => (
+                    {menuItems.map((item) => (
                         <Link
                             to={item.key}
                             key={item.key}
