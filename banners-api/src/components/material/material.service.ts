@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MaterialEntity } from '../../entities/material.entity';
-import { FindOptionsWhere, Like, MoreThan, Repository } from 'typeorm';
+import { FindOptionsWhere, Like, Repository } from 'typeorm';
 
 @Injectable()
 export class MaterialService {
@@ -10,27 +10,6 @@ export class MaterialService {
     private readonly materialRepository: Repository<MaterialEntity>,
   ) {}
 
-  async createMaterial(createDto: any) {
-    return this.materialRepository.save(
-      this.materialRepository.create({ ...createDto }),
-    );
-  }
-
-  async findOneMaterial(id: number) {
-    return await this.materialRepository.findOne({
-      where: { id },
-    });
-  }
-
-  async updateMaterial(id: number, updateDto: any) {
-    const material = await this.materialRepository.findOne({ where: { id } });
-    if (!material) {
-      throw new NotFoundException(`Material with id ${id} not found`);
-    }
-
-    return this.materialRepository.save({ ...material, ...updateDto });
-  }
-
   async findAllMaterials(queryParams: Record<string, any> = {}): Promise<any> {
     const params: FindOptionsWhere<MaterialEntity> = {};
 
@@ -38,27 +17,27 @@ export class MaterialService {
       params.name = Like(`%${queryParams.search}%`);
     }
 
-    if (queryParams.minPrice) {
-      params.pricePerUnit = MoreThan(+queryParams.minPrice);
+    if (queryParams.measurementUnit) {
+      params.measurementUnit = queryParams.measurementUnit;
     }
 
-    const [materials, count] = await this.materialRepository.findAndCount({
-      skip: +queryParams.skip || 0,
-      take: +queryParams.take || 20,
+    const skip = queryParams.skip ? parseInt(queryParams.skip, 10) : 0;
+    const take = queryParams.take ? parseInt(queryParams.take, 10) : 20;
+
+    const order = queryParams.sortField
+      ? { [queryParams.sortField]: queryParams.sortOrder || 'ASC' }
+      : {};
+
+    const [materials, total] = await this.materialRepository.findAndCount({
+      skip,
+      take,
       where: params,
+      order,
     });
 
     return {
       materials,
-      total: count,
+      total,
     };
-  }
-
-  async removeMaterial(id: number) {
-    const material = await this.materialRepository.findOne({ where: { id } });
-    if (!material) {
-      throw new NotFoundException(`Material with id ${id} not found`);
-    }
-    return await this.materialRepository.delete(id);
   }
 }

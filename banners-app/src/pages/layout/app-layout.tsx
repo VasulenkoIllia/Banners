@@ -8,8 +8,8 @@ const menuItems = [
         label: 'Dashboard',
     },
     {
-        key: '/players',
-        label: 'Players',
+        key: '/materials',
+        label: 'Materials',
     },
     {
         key: '/squads',
