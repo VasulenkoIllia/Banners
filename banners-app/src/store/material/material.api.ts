@@ -47,13 +47,22 @@ export const materialApi = createApi({
             providesTags: (id) => [{type: 'Material', id}],
         }),
 
+        updateMaterialQuantity: builder.mutation({
+            query: ({id, ...data}) => ({
+                url: `admin/material/${id}/addQuantity`,
+                method: 'POST',
+                body: data,
+            }),
+            invalidatesTags: [{type: 'Material', id: 'LIST'}],
+        }),
+
         updateMaterial: builder.mutation({
             query: ({id, ...data}) => ({
                 url: `admin/material/${id}/update`,
-                method: 'PUT',
+                method: 'POST',
                 body: data,
             }),
-            invalidatesTags: ({id}) => [{type: 'Material', id}],
+            invalidatesTags: [{type: 'Material', id: 'LIST'}],
         }),
 
         deleteMaterial: builder.mutation({
@@ -70,6 +79,7 @@ export const {
     useCreateMaterialMutation,
     useGetAllMaterialsQuery,
     useGetMaterialByIdQuery,
-    useUpdateMaterialMutation,
+    useUpdateMaterialQuantityMutation,
     useDeleteMaterialMutation,
+    useUpdateMaterialMutation,
 } = materialApi;

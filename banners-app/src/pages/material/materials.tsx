@@ -1,5 +1,5 @@
 import {Button, Input, message, Modal, Pagination, Select, Skeleton, Table, TableProps} from "antd";
-import {Link, Outlet, useNavigate, useParams} from "react-router-dom";
+import {Link, useNavigate, useParams} from "react-router-dom";
 import {useDeleteMaterialMutation, useGetAllMaterialsQuery} from "../../store/material/material.api";
 import {useState} from "react";
 import {Config} from "../../config";
@@ -15,17 +15,17 @@ export default function Materials() {
 
     const [selectedSortUnit, setSelectedSortUnit] = useState<string | undefined>(undefined);
     const [searchQuery, setSearchQuery] = useState<string | undefined>(undefined);
-
+    const [sortField, setSortField] = useState<string | undefined>(undefined);
+    const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | undefined>(undefined);
 
     const {data, isLoading} = useGetAllMaterialsQuery({
         skip: pageSize * (currentPage - 1),
         take: pageSize,
         measurementUnit: selectedSortUnit,
         search: searchQuery,
-        sortField: selectedSortUnit ? 'measurementUnit' : undefined,
-        sortOrder: 'ASC',
+        sortField,
+        sortOrder,
     });
-
 
     const [deleteMaterial] = useDeleteMaterialMutation();
     const materials = data?.materials || [];
@@ -43,7 +43,7 @@ export default function Materials() {
             cancelText: 'No',
             onOk: async () => {
                 try {
-                    await deleteMaterial({id}).unwrap();
+                    await deleteMaterial(id).unwrap();
                     message.success('Material deleted successfully');
                 } catch (error) {
                     message.error('Failed to delete Material');
@@ -60,6 +60,10 @@ export default function Materials() {
         setSelectedSortUnit(value);
     };
 
+    const handleTableChange = (pagination: any, filters: any, sorter: any) => {
+        setSortField(sorter.field);
+        setSortOrder(sorter.order);
+    };
 
     const columns: TableProps['columns'] = [
         {
@@ -68,24 +72,36 @@ export default function Materials() {
             key: 'id',
         },
         {
-            title: 'Name',
+            title: 'Назва',
             dataIndex: 'name',
             key: 'name',
+            sorter: (a, b) => a.name.localeCompare(b.name),
         },
         {
-            title: 'Measurement Unit',
+            title: 'Одиниці вимірювання',
             dataIndex: 'measurementUnit',
             key: 'measurementUnit',
         },
         {
-            title: 'Price Per Unit',
+            title: 'Ціна за одиницю',
             dataIndex: 'pricePerUnit',
             key: 'pricePerUnit',
+            sorter: (a, b) => a.pricePerUnit - b.pricePerUnit,
         },
         {
-            title: 'Quantity',
+            title: 'Кількість',
             dataIndex: 'quantity',
             key: 'quantity',
+            sorter: (a, b) => a.quantity - b.quantity,
+        },
+        {
+            title: 'Загальна вартість',
+            key: 'totalSum',
+            render: (_, record) => {
+                const totalSum = Number(record.pricePerUnit) * Number(record.quantity);
+                return totalSum.toFixed(2);
+            },
+            sorter: (a, b) => (a.pricePerUnit * a.quantity) - (b.pricePerUnit * b.quantity),
         },
         {
             title: 'Action',
@@ -115,7 +131,7 @@ export default function Materials() {
     return (
         <Skeleton loading={isLoading}>
             <Select
-                style={{width: 200, marginBottom: 16}}
+                style={{width: 150, marginBottom: 16}}
                 placeholder="Sort by Measurement Unit"
                 onChange={handleSortChange}
                 allowClear
@@ -131,22 +147,26 @@ export default function Materials() {
                 placeholder="Search by Name"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onSearch={() => {
-                }}
-                style={{width: 200, marginBottom: 16}}
+                style={{width: 150, marginBottom: 16}}
             />
 
+            <Button type="primary" htmlType="submit"
+                    style={{width: 150, marginLeft: 10}}>
+                <Link className={'mr-2'} to={'add-material-quantity'}>{`Add Material Quantity`}</Link>
+            </Button>
+
+            <Button type="primary" htmlType="submit"
+                    style={{width: 150, marginLeft: 10}}>
+                <Link className={'mr-2'} to={'create-material'}>{`Create Material`}</Link>
+            </Button>
 
             <Table
                 columns={columns}
                 loading={isLoading}
                 pagination={false}
                 dataSource={materials.map((record) => ({...record, key: record.id}))}
+                onChange={handleTableChange}
             />
-
-            <Button type="primary" htmlType="submit">
-                <Link to="create">Add Material</Link>
-            </Button>
 
             <div className="mt-6">
                 <Pagination
@@ -157,7 +177,6 @@ export default function Materials() {
                     total={count}
                 />
             </div>
-            <Outlet/>
         </Skeleton>
     );
 }

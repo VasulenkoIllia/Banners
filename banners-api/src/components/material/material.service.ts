@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MaterialEntity } from '../../entities/material.entity';
-import { FindOptionsWhere, Like, Repository } from 'typeorm';
+import { FindOptionsWhere, ILike, Repository } from 'typeorm';
 
 @Injectable()
 export class MaterialService {
@@ -10,11 +10,57 @@ export class MaterialService {
     private readonly materialRepository: Repository<MaterialEntity>,
   ) {}
 
+  async createMaterial(createDto: any) {
+    const material = this.materialRepository.create(createDto);
+    return await this.materialRepository.save(material);
+  }
+
+  async findOneMaterial(id: number) {
+    const product = await this.materialRepository.findOne({ where: { id } });
+    if (!product) {
+      throw new NotFoundException(`Material with id ${id} not found`);
+    }
+    return product;
+  }
+
+  async addMaterialQuantity(id: number, addQuantity: number, newPrice: number) {
+    const material = await this.materialRepository.findOne({ where: { id } });
+
+    if (!material) {
+      throw new NotFoundException(`Material with id ${id} not found`);
+    }
+
+    material.quantity = Number(material.quantity) + Number(addQuantity);
+
+    if (newPrice > material.pricePerUnit) {
+      material.pricePerUnit = newPrice;
+    }
+
+    return await this.materialRepository.save(material);
+  }
+
+  async updateMaterial(id: number, updateDto: any) {
+    const material = await this.materialRepository.findOne({ where: { id } });
+    if (!material) {
+      throw new NotFoundException(`Material with id ${id} not found`);
+    }
+    return await this.materialRepository.save({ ...material, ...updateDto });
+  }
+
+  async removeMaterial(id: number) {
+    const material = await this.materialRepository.findOne({ where: { id } });
+    if (!material) {
+      throw new NotFoundException(`Material with id ${id} not found`);
+    }
+    await this.materialRepository.delete(id);
+    return { message: 'Material successfully deleted' };
+  }
+
   async findAllMaterials(queryParams: Record<string, any> = {}): Promise<any> {
     const params: FindOptionsWhere<MaterialEntity> = {};
 
     if (queryParams.search) {
-      params.name = Like(`%${queryParams.search}%`);
+      params.name = ILike(`%${queryParams.search}%`);
     }
 
     if (queryParams.measurementUnit) {
