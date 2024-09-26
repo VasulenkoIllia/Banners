@@ -54,7 +54,10 @@ export class MaterialController {
   }
 
   @AdminEndpoint('material/:id/update', RequestMethod.PUT)
-  async updateMaterial(@Param('id', ParseIntPipe) id: number, updateDto: any) {
+  async updateMaterial(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDto: any,
+  ) {
     const updatedMaterial = await this.materialService.updateMaterial(
       id,
       updateDto,

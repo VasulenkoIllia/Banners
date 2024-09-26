@@ -14,6 +14,7 @@ export class ProductMaterialEntity {
 
   @ManyToOne(() => ProductEntity, (product) => product.productMaterials, {
     onDelete: 'CASCADE',
+    nullable: false,
   })
   public product: ProductEntity;
 

@@ -12,12 +12,12 @@ const menuItems = [
         label: 'Materials',
     },
     {
-        key: '/squads',
-        label: 'Squads',
+        key: '/customers',
+        label: 'Customers',
     },
     {
-        key: '/settings',
-        label: 'Settings',
+        key: '/products',
+        label: 'Products',
     },
     {
         key: '/notifications',

@@ -33,6 +33,13 @@ export default function MaterialEdit() {
         }
     };
 
+    if (data) {
+        form.setFieldsValue({
+            name: data.name,
+            measurementUnit: data.measurementUnit,
+        });
+    }
+
     return (
         <ModalPage
             title={'Edit Material'}
@@ -43,10 +50,6 @@ export default function MaterialEdit() {
                 <Form
                     form={form}
                     layout="vertical"
-                    initialValues={{
-                        name: data?.name,
-                        measurementUnit: data?.measurementUnit,
-                    }}
                     onFinish={handleFormSubmit}
                 >
                     <Form.Item

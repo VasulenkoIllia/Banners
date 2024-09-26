@@ -23,7 +23,6 @@ export class ProductEntity {
   @OneToMany(
     () => ProductMaterialEntity,
     (productMaterial) => productMaterial.product,
-    { cascade: true },
   )
   public productMaterials: ProductMaterialEntity[];
 

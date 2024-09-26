@@ -1,7 +1,15 @@
-import { Controller, RequestMethod } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  ParseIntPipe,
+  Req,
+  RequestMethod,
+} from '@nestjs/common';
 import { ProductService } from './product.service';
-import { AdminEndpoint } from '../../common/decorators/admin-endpoint.decorator';
 import { ApiTags } from '@nestjs/swagger';
+import { AdminEndpoint } from '../../common/decorators/admin-endpoint.decorator';
+import { AppRequest } from '../../common/interfaces/app-request';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -9,33 +17,29 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @AdminEndpoint('product/create', RequestMethod.POST)
-  async createProduct(createDto: any) {
-    const product = await this.productService.createProduct(createDto);
+  async createProduct(@Body() createDto: any) {
+    const material = await this.productService.createProduct(createDto);
     return {
       message: 'Product successfully created',
-      product,
+      material,
     };
-  }
-
-  @AdminEndpoint('product/:id', RequestMethod.GET)
-  async findOneProduct(id: number) {
-    const product = await this.productService.findOneProduct(id);
-    return product;
   }
 
   @AdminEndpoint('product/findAll', RequestMethod.GET)
-  async findAllProducts(queryParams: Record<string, any> = {}) {
-    const { products, total } = await this.productService.findAllProducts(
-      queryParams,
-    );
-    return {
-      products,
-      total,
-    };
+  findAllProducts(@Req() req: AppRequest) {
+    return this.productService.findAllProducts(req.query);
+  }
+
+  @AdminEndpoint('product/:id', RequestMethod.GET)
+  async findOneProduct(@Param('id', ParseIntPipe) id: number) {
+    return await this.productService.findOneProduct(id);
   }
 
   @AdminEndpoint('product/:id/update', RequestMethod.PUT)
-  async updateProduct(id: number, updateDto: any) {
+  async updateProduct(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDto: any,
+  ) {
     const updatedProduct = await this.productService.updateProduct(
       id,
       updateDto,
@@ -47,7 +51,7 @@ export class ProductController {
   }
 
   @AdminEndpoint('product/:id/delete', RequestMethod.DELETE)
-  async removeProduct(id: number) {
+  async removeProduct(@Param('id', ParseIntPipe) id: number) {
     await this.productService.removeProduct(id);
     return {
       message: 'Product successfully deleted',

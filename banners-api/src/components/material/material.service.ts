@@ -2,12 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MaterialEntity } from '../../entities/material.entity';
 import { FindOptionsWhere, ILike, Repository } from 'typeorm';
+import { ProductService } from '../product/product.service';
 
 @Injectable()
 export class MaterialService {
   constructor(
     @InjectRepository(MaterialEntity)
     private readonly materialRepository: Repository<MaterialEntity>,
+    private readonly productService: ProductService,
   ) {}
 
   async createMaterial(createDto: any) {
@@ -32,11 +34,19 @@ export class MaterialService {
 
     material.quantity = Number(material.quantity) + Number(addQuantity);
 
+    let priceUpdated = false;
     if (newPrice > material.pricePerUnit) {
       material.pricePerUnit = newPrice;
+      priceUpdated = true;
     }
 
-    return await this.materialRepository.save(material);
+    await this.materialRepository.save(material);
+
+    if (priceUpdated) {
+      await this.productService.updateProductCostPricesForMaterial(id);
+    }
+
+    return material;
   }
 
   async updateMaterial(id: number, updateDto: any) {

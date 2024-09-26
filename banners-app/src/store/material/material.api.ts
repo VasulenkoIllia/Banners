@@ -59,7 +59,7 @@ export const materialApi = createApi({
         updateMaterial: builder.mutation({
             query: ({id, ...data}) => ({
                 url: `admin/material/${id}/update`,
-                method: 'POST',
+                method: 'PUT',
                 body: data,
             }),
             invalidatesTags: [{type: 'Material', id: 'LIST'}],

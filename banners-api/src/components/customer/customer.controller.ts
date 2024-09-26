@@ -1,85 +1,58 @@
-import { Controller, NotFoundException, RequestMethod } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CustomerEntity } from '../../entities/customer.entity';
-import { FindOptionsWhere, Like, Repository } from 'typeorm';
+import {
+  Body,
+  Controller,
+  Param,
+  ParseIntPipe,
+  Req,
+  RequestMethod,
+} from '@nestjs/common';
 import { AdminEndpoint } from '../../common/decorators/admin-endpoint.decorator';
 import { ApiTags } from '@nestjs/swagger';
+import { CustomerService } from './customer.service';
+import { AppRequest } from '../../common/interfaces/app-request';
 
 @ApiTags('Admin')
 @Controller('admin')
 export class CustomerController {
-  constructor(
-    @InjectRepository(CustomerEntity)
-    private readonly customerRepository: Repository<CustomerEntity>,
-  ) {}
+  constructor(private readonly customerService: CustomerService) {}
 
   @AdminEndpoint('customer/create', RequestMethod.POST)
-  async createCustomer(createDto: any) {
-    const customer = await this.customerRepository.save(
-      this.customerRepository.create({ ...createDto }),
-    );
+  async createMaterial(@Body() createDto: any) {
+    const customer = await this.customerService.createCustomer(createDto);
     return {
-      message: 'Customer successfully created',
+      message: 'Material successfully created',
       customer,
     };
   }
 
+  @AdminEndpoint('customer/findAll', RequestMethod.GET)
+  findAllMaterials(@Req() req: AppRequest) {
+    return this.customerService.findAllCustomers(req.query);
+  }
+
   @AdminEndpoint('customer/:id', RequestMethod.GET)
-  async findOneCustomer(id: number) {
-    const customer = await this.customerRepository.findOne({
-      where: { id },
-    });
-    if (!customer) {
-      throw new NotFoundException(`Customer with id ${id} not found`);
-    }
-    return customer;
+  async findOneMaterial(@Param('id', ParseIntPipe) id: number) {
+    return await this.customerService.findOneCustomer(id);
   }
 
   @AdminEndpoint('customer/:id/update', RequestMethod.PUT)
-  async updateCustomer(id: number, updateDto: any) {
-    const customer = await this.customerRepository.findOne({ where: { id } });
-    if (!customer) {
-      throw new NotFoundException(`Customer with id ${id} not found`);
-    }
-
-    const updatedCustomer = await this.customerRepository.save({
-      ...customer,
-      ...updateDto,
-    });
-
+  async updateCustomer(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDto: any,
+  ) {
+    const updatedCustomer = await this.customerService.updateCustomer(
+      id,
+      updateDto,
+    );
     return {
       message: 'Customer successfully updated',
       updatedCustomer,
     };
   }
 
-  @AdminEndpoint('customer/findAll', RequestMethod.GET)
-  async findAllCustomers(queryParams: Record<string, any> = {}): Promise<any> {
-    const params: FindOptionsWhere<CustomerEntity> = {};
-
-    if (queryParams.search) {
-      params.name = Like(`%${queryParams.search}%`);
-    }
-
-    const [customers, count] = await this.customerRepository.findAndCount({
-      skip: +queryParams.skip || 0,
-      take: +queryParams.take || 20,
-      where: params,
-    });
-
-    return {
-      customers,
-      total: count,
-    };
-  }
-
   @AdminEndpoint('customer/:id/delete', RequestMethod.DELETE)
-  async removeCustomer(id: number) {
-    const customer = await this.customerRepository.findOne({ where: { id } });
-    if (!customer) {
-      throw new NotFoundException(`Customer with id ${id} not found`);
-    }
-    await this.customerRepository.delete(id);
+  async removeMaterial(@Param('id', ParseIntPipe) id: number) {
+    await this.customerService.removeCustomer(id);
     return {
       message: 'Customer successfully deleted',
     };

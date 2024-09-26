@@ -4,6 +4,12 @@ import Materials from "./material/materials";
 import MaterialEdit from "./material/material-edit";
 import MaterialCreate from "./material/material-create";
 import AddMaterialQuantity from "./material/material-quantity-add";
+import Customers from "./customer/customers";
+import CustomerEdit from "./customer/customer-edit";
+import CustomerCreate from "./customer/customer-create";
+import Products from "./product/products";
+import ProductCreate from "./product/product-create";
+import ProductEdit from "./product/product-edit";
 
 
 export const router = createBrowserRouter([
@@ -30,7 +36,42 @@ export const router = createBrowserRouter([
             {
                 path: "/materials/add-material-quantity",
                 element: <AddMaterialQuantity/>,
-            }
+            },
+            /////////////////////
+            {
+                path: "/customers",
+                element: <Customers/>,
+            },
+            {
+                path: "/customers/page/:pageId",
+                element: <Customers/>,
+            },
+            {
+                path: "/customers/create",
+                element: <CustomerCreate/>,
+            },
+            {
+                path: "/customers/:id/edit",
+                element: <CustomerEdit/>,
+            },
+
+            /////////////////////
+            {
+                path: "/products",
+                element: <Products/>,
+            },
+            {
+                path: "/products/page/:pageId",
+                element: <Products/>,
+            },
+            {
+                path: "/products/create",
+                element: <ProductCreate/>,
+            },
+            {
+                path: "/products/:id/edit",
+                element: <ProductEdit/>,
+            },
 
         ]
     }
