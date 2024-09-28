@@ -20,7 +20,7 @@ export class CustomerController {
   async createMaterial(@Body() createDto: any) {
     const customer = await this.customerService.createCustomer(createDto);
     return {
-      message: 'Material successfully created',
+      message: 'Customer successfully created',
       customer,
     };
   }

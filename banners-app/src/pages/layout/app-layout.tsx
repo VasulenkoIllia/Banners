@@ -20,8 +20,8 @@ const menuItems = [
         label: 'Products',
     },
     {
-        key: '/notifications',
-        label: 'Notifications',
+        key: '/orders',
+        label: 'Orders',
     },
     {
         key: '/tasks',

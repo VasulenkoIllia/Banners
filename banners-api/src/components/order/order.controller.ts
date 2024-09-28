@@ -17,10 +17,10 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @AdminEndpoint('order/create', RequestMethod.POST)
-  async createMaterial(@Body() createDto: any) {
+  async createOrder(@Body() createDto: any) {
     const order = await this.orderService.createOrder(createDto);
     return {
-      message: 'Material successfully created',
+      message: 'Order successfully created',
       order,
     };
   }
@@ -36,7 +36,10 @@ export class OrderController {
   }
 
   @AdminEndpoint('order/:id/update', RequestMethod.PUT)
-  async updateOrder(@Param('id', ParseIntPipe) id: number, updateDto: any) {
+  async updateOrder(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDto: any,
+  ) {
     const updatedOrder = await this.orderService.updateOrder(id, updateDto);
     return {
       message: 'Order successfully updated',
@@ -45,7 +48,7 @@ export class OrderController {
   }
 
   @AdminEndpoint('order/:id/delete', RequestMethod.DELETE)
-  async removeMaterial(@Param('id', ParseIntPipe) id: number) {
+  async removeOrder(@Param('id', ParseIntPipe) id: number) {
     await this.orderService.removeOrder(id);
     return {
       message: 'Order successfully deleted',

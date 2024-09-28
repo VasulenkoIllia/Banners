@@ -10,6 +10,8 @@ import CustomerCreate from "./customer/customer-create";
 import Products from "./product/products";
 import ProductCreate from "./product/product-create";
 import ProductEdit from "./product/product-edit";
+import Orders from "./order/orders";
+import OrderCreate from "./order/order-create";
 
 
 export const router = createBrowserRouter([
@@ -72,6 +74,24 @@ export const router = createBrowserRouter([
                 path: "/products/:id/edit",
                 element: <ProductEdit/>,
             },
+
+            /////////////////////
+            {
+                path: "/orders",
+                element: <Orders/>,
+            },
+            {
+                path: "/orders/page/:pageId",
+                element: <Orders/>,
+            },
+            {
+                path: "/orders/create",
+                element: <OrderCreate/>,
+            },
+            // {
+            //     path: "/orders/:id/edit",
+            //     element: <OrderEdit/>,
+            // },
 
         ]
     }

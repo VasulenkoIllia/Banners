@@ -1,14 +1,14 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ManyToMany,
-  ManyToOne,
-  JoinTable,
   BeforeInsert,
   BeforeUpdate,
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ProductEntity } from './product.entity';
 import { OrderStatus } from '../common/interfaces/Order/OrderStatus.enum';
@@ -70,14 +70,16 @@ export class OrderEntity {
   @BeforeInsert()
   @BeforeUpdate()
   public calculateOrderPrices(): void {
-    this.costPrice = this.products.reduce(
-      (total, product) => total + product.costPrice,
-      0,
-    );
-    this.salePrice = this.products.reduce(
-      (total, product) => total + product.salePrice,
-      0,
-    );
+    this.costPrice = this.products.reduce((total, product) => {
+      const productCostPrice = parseFloat(String(product.costPrice)) || 0;
+      return total + productCostPrice;
+    }, 0);
+
+    this.salePrice = this.products.reduce((total, product) => {
+      const productSalePrice = parseFloat(String(product.salePrice)) || 0;
+      return total + productSalePrice;
+    }, 0);
+
     this.profit = this.salePrice - this.costPrice;
   }
 }

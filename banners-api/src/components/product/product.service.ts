@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { FindOptionsWhere, ILike, In, Repository } from 'typeorm';
 import { ProductEntity } from '../../entities/product.entity';
 import { ProductMaterialEntity } from '../../entities/product_material.entity';
 import { MaterialEntity } from '../../entities/material.entity';
@@ -64,7 +64,6 @@ export class ProductService {
 
     for (const productMaterial of productMaterials) {
       const product = productMaterial.product;
-      const material = productMaterial.material;
 
       const productMaterialsForProduct =
         await this.productMaterialRepository.find({
@@ -83,10 +82,24 @@ export class ProductService {
   }
 
   async findAllProducts(queryParams: Record<string, any> = {}): Promise<any> {
+    const params: FindOptionsWhere<ProductEntity> = {};
+
+    if (queryParams.name) {
+      params.name = ILike(`%${queryParams.name}%`);
+    }
+
+    const skip = queryParams.skip ? parseInt(queryParams.skip, 10) : 0;
+    const take = queryParams.take ? parseInt(queryParams.take, 10) : 20;
+
+    const order = queryParams.sortField
+      ? { [queryParams.sortField]: queryParams.sortOrder || 'ASC' }
+      : {};
+
     const [products, total] = await this.productRepository.findAndCount({
-      skip: +queryParams.skip || 0,
-      take: +queryParams.take || 20,
-      where: {},
+      skip,
+      take,
+      where: params,
+      order,
     });
 
     return { products, total };

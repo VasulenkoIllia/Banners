@@ -1,18 +1,25 @@
 import {Form, Input, message} from "antd";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import {useCreateCustomerMutation} from "../../store/customer/customer.api";
 import ModalPage from "../../components/modalPage";
 
 export default function CustomerCreate() {
     const [form] = Form.useForm();
     const navigate = useNavigate();
+    const location = useLocation();
     const [createCustomer] = useCreateCustomerMutation();
 
     const handleFormSubmit = async (values: any) => {
         try {
-            await createCustomer(values).unwrap();
+            const createdCustomer = await createCustomer(values).unwrap();
             message.success("Customer successfully created!");
-            navigate("/customers");
+            if (location.state?.fromOrderCreate) {
+                navigate("/orders/create", {
+                    state: {customerId: createdCustomer.customer.id},
+                });
+            } else {
+                navigate("/customers");
+            }
         } catch (error) {
             message.error("Failed to create customer.");
         }
@@ -64,7 +71,6 @@ export default function CustomerCreate() {
                 >
                     <Input placeholder="Enter Instagram handle (optional)"/>
                 </Form.Item>
-
             </Form>
         </ModalPage>
     );
