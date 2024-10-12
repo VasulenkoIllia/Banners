@@ -24,8 +24,8 @@ const menuItems = [
         label: 'Orders',
     },
     {
-        key: '/tasks',
-        label: 'Tasks',
+        key: '/expenses',
+        label: 'Expense',
     },
     {
         key: '/levels',

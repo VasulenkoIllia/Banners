@@ -6,6 +6,7 @@ import {Spin} from "antd";
 import {LoadingOutlined} from "@ant-design/icons";
 import Login from "./components/login/login";
 import Notify from "./components/notify";
+import "/node_modules/flag-icons/css/flag-icons.min.css";
 
 
 function App() {

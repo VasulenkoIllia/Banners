@@ -25,7 +25,6 @@ export default function CustomerEdit() {
         form.submit();
     };
 
-    // Use useEffect to set form values when customer data is available
     useEffect(() => {
         if (customer) {
             form.setFieldsValue({
@@ -33,9 +32,10 @@ export default function CustomerEdit() {
                 address: customer.address,
                 phone: customer.phone,
                 instagram: customer.instagram,
+                etsy: customer.etsy,
             });
         }
-    }, [customer, form]); // Depend on customer and form
+    }, [customer, form]);
 
     return (
         <ModalPage
@@ -52,6 +52,7 @@ export default function CustomerEdit() {
                     address: customer?.address,
                     phone: customer?.phone,
                     instagram: customer?.instagram,
+                    etsy: customer?.etsy,
                 }}
             >
                 <Form.Item
@@ -84,6 +85,14 @@ export default function CustomerEdit() {
                     rules={[{required: false, message: "Please input Instagram handle!"}]}
                 >
                     <Input placeholder="Enter Instagram handle (optional)"/>
+                </Form.Item>
+
+                <Form.Item
+                    label="Etsy"
+                    name="etsy"
+                    rules={[{required: false, message: "Please input Etsy handle!"}]}
+                >
+                    <Input placeholder="Enter Etsy handle (optional)"/>
                 </Form.Item>
             </Form>
         </ModalPage>

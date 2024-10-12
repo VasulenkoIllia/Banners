@@ -3,6 +3,8 @@ import {Link, useNavigate, useParams} from "react-router-dom";
 import {useDeleteOrderMutation, useGetAllOrdersQuery} from "../../store/order/order.api";
 import {useEffect, useState} from "react";
 import {Config} from "../../config";
+import {OrderStatus} from "../../common/Order/OrderStatus.enum";
+import {formatDate} from "../../common/helpers/formatDate";
 
 const pageSize = Config.ITEM_PER_PAGE;
 
@@ -34,6 +36,10 @@ export default function Orders() {
 
     const handleEdit = (id: number) => {
         navigate(`/orders/${id}/edit`);
+    };
+
+    const handleInfo = (id: number) => {
+        navigate(`/orders/${id}/info`);
     };
 
     const handleDelete = async (id: number) => {
@@ -71,15 +77,6 @@ export default function Orders() {
 
         setSortField(sortField);
         setSortOrder(sortOrder);
-    };
-
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return new Intl.DateTimeFormat('uk-UA', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-        }).format(date);
     };
 
     const isDatePast = (dateString: string) => {
@@ -154,15 +151,13 @@ export default function Orders() {
             key: 'address',
         },
         {
-            title: 'Completion Date',
-            dataIndex: 'completionDate',
-            key: 'completionDate',
-            sorter: true,
-            render: (completionDate: string) => {
-                const formattedDate = formatDate(completionDate);
-                const color = isDatePast(completionDate) ? 'red' : 'green';
-                return <span style={{color}}>{formattedDate}</span>;
-            },
+            title: 'Country',
+            dataIndex: 'country',
+            key: 'country',
+            render: (countryCode) => (
+                <span>
+      {<span className={`fi fi-${countryCode?.toLowerCase()}`}/>}</span>
+            ),
         },
         {
             title: 'Customer',
@@ -175,6 +170,17 @@ export default function Orders() {
             ),
         },
         {
+            title: 'Completion Date',
+            dataIndex: 'completionDate',
+            key: 'completionDate',
+            sorter: true,
+            render: (completionDate: string) => {
+                const formattedDate = formatDate(completionDate);
+                const color = isDatePast(completionDate) ? 'red' : 'green';
+                return <span style={{color}}>{formattedDate}</span>;
+            },
+        },
+        {
             title: 'Action',
             key: 'action',
             align: 'center',
@@ -184,6 +190,7 @@ export default function Orders() {
                         type="link"
                         onClick={() => handleEdit(record.id)}
                         style={{marginRight: 8}}
+                        disabled={record.status === OrderStatus.CANCELLATION}
                     >
                         Edit
                     </Button>
@@ -193,6 +200,13 @@ export default function Orders() {
                         onClick={() => handleDelete(record.id)}
                     >
                         Delete
+                    </Button>
+                    <Button
+                        type="link"
+                        onClick={() => handleInfo(record.id)}
+                        style={{marginRight: 8}}
+                    >
+                        Info
                     </Button>
                 </>
             ),

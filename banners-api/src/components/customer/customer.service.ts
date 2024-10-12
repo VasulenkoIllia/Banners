@@ -22,6 +22,7 @@ export class CustomerService {
           { name: ILike(`%${queryParams.search}%`) },
           { phone: ILike(`%${queryParams.search}%`) },
           { instagram: ILike(`%${queryParams.search}%`) },
+          { etsy: ILike(`%${queryParams.search}%`) },
         ]
       : [];
 
@@ -38,7 +39,10 @@ export class CustomerService {
   }
 
   async findOneCustomer(id: number) {
-    const customer = await this.customerRepository.findOne({ where: { id } });
+    const customer = await this.customerRepository.findOne({
+      where: { id },
+      relations: ['orders'],
+    });
     if (!customer) {
       throw new NotFoundException(`Customer with id ${id} not found`);
     }

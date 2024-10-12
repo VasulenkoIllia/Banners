@@ -33,38 +33,48 @@ export default function AddMaterialQuantity() {
             });
         }
     };
-
     const handleQuantityChange = (value: number) => {
         setAddQuantity(value);
 
-        if (newPrice !== undefined) {
+        if (newPrice !== undefined && newPrice > 0) {
             const calculatedSum = value * newPrice;
             setTotalSum(calculatedSum);
             form.setFieldsValue({totalSum: calculatedSum.toFixed(2)});
+        } else if (totalSum !== undefined && totalSum > 0) {
+            const calculatedPrice = totalSum / value;
+            setNewPrice(calculatedPrice);
+            form.setFieldsValue({newPrice: calculatedPrice.toFixed(2)});
         }
     };
 
     const handlePriceChange = (value: number) => {
         setNewPrice(value);
 
-        if (addQuantity !== undefined) {
+        if (addQuantity !== undefined && addQuantity > 0) {
             const calculatedSum = value * addQuantity;
             setTotalSum(calculatedSum);
             form.setFieldsValue({totalSum: calculatedSum.toFixed(2)});
+        } else if (totalSum !== undefined && totalSum > 0) {
+            const calculatedQuantity = totalSum / value;
+            setAddQuantity(calculatedQuantity);
+            form.setFieldsValue({addQuantity: calculatedQuantity.toFixed(2)});
         }
     };
 
     const handleSumChange = (value: number) => {
         setTotalSum(value);
 
-        if (newPrice && newPrice > 0) {
+        if (newPrice !== undefined && newPrice > 0) {
             const calculatedQuantity = value / newPrice;
             setAddQuantity(calculatedQuantity);
             form.setFieldsValue({addQuantity: calculatedQuantity.toFixed(2)});
-        } else {
-            message.error('Price must be greater than 0 to calculate quantity.');
+        } else if (addQuantity !== undefined && addQuantity > 0) {
+            const calculatedPrice = value / addQuantity;
+            setNewPrice(calculatedPrice);
+            form.setFieldsValue({newPrice: calculatedPrice.toFixed(2)});
         }
     };
+
 
     const handleFormSubmit = async () => {
         try {

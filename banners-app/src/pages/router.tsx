@@ -5,13 +5,18 @@ import MaterialEdit from "./material/material-edit";
 import MaterialCreate from "./material/material-create";
 import AddMaterialQuantity from "./material/material-quantity-add";
 import Customers from "./customer/customers";
-import CustomerEdit from "./customer/customer-edit";
 import CustomerCreate from "./customer/customer-create";
 import Products from "./product/products";
 import ProductCreate from "./product/product-create";
 import ProductEdit from "./product/product-edit";
 import Orders from "./order/orders";
 import OrderCreate from "./order/order-create";
+import OrderInfo from "./order/order-info";
+import OrderEdit from "./order/order-edit";
+import CustomerInfo from "./customer/customer-info";
+import Expenses from "./expense/expenses";
+import ExpenseCreate from "./expense/expense-create";
+import ExpenseInfo from "./expense/expense-info";
 
 
 export const router = createBrowserRouter([
@@ -53,9 +58,10 @@ export const router = createBrowserRouter([
                 element: <CustomerCreate/>,
             },
             {
-                path: "/customers/:id/edit",
-                element: <CustomerEdit/>,
+                path: "/customers/:id/info",
+                element: <CustomerInfo/>,
             },
+
 
             /////////////////////
             {
@@ -88,10 +94,33 @@ export const router = createBrowserRouter([
                 path: "/orders/create",
                 element: <OrderCreate/>,
             },
-            // {
-            //     path: "/orders/:id/edit",
-            //     element: <OrderEdit/>,
-            // },
+            {
+                path: "/orders/:id/info",
+                element: <OrderInfo/>,
+            },
+            {
+                path: "/orders/:id/edit",
+                element: <OrderEdit/>,
+            },
+
+            ///////////////////
+            {
+                path: "/expenses",
+                element: <Expenses/>,
+            },
+            {
+                path: "/expenses/page/:pageId",
+                element: <Expenses/>,
+            },
+            {
+                path: "/expenses/create",
+                element: <ExpenseCreate/>,
+            },
+            {
+                path: "/expenses/:id/info",
+                element: <ExpenseInfo/>,
+            },
+
 
         ]
     }

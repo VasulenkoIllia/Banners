@@ -65,6 +65,7 @@ export default function OrderCreate() {
                 })),
                 completionDate: values.completionDate ? values.completionDate.toISOString() : null,
             };
+            console.log(orderData)
             await createOrder(orderData).unwrap();
             message.success("Order successfully created!");
             navigate("/orders");
@@ -140,6 +141,17 @@ export default function OrderCreate() {
                         {customersData?.customers.map((customer: any) => (
                             <Option key={customer.id} value={customer.id}>{customer.name}</Option>
                         ))}
+                    </Select>
+                </Form.Item>
+
+                <Form.Item
+                    label="Country"
+                    name="country"
+                    rules={[{required: true, message: "Please select a status!"}]}
+                >
+                    <Select placeholder="Select order country">
+                        <Option value={'EU'}>{'EU'}</Option>
+                        <Option value={'UA'}>{'UA'}</Option>
                     </Select>
                 </Form.Item>
 

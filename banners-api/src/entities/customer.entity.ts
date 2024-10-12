@@ -1,10 +1,10 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
+  Entity,
   OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { OrderEntity } from './order.entity';
 
@@ -24,6 +24,9 @@ export class CustomerEntity {
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   public instagram: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  public etsy: string;
 
   @OneToMany(() => OrderEntity, (order) => order.customer)
   public orders: OrderEntity[];

@@ -71,6 +71,14 @@ export default function CustomerCreate() {
                 >
                     <Input placeholder="Enter Instagram handle (optional)"/>
                 </Form.Item>
+
+                <Form.Item
+                    label="Etsy"
+                    name="etsy"
+                    rules={[{required: false, message: "Please input Etsy handle!"}]}
+                >
+                    <Input placeholder="Enter Etsy handle (optional)"/>
+                </Form.Item>
             </Form>
         </ModalPage>
     );

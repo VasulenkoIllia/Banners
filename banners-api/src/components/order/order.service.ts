@@ -23,6 +23,7 @@ export class OrderService {
   async createOrder(createDto: any) {
     const { customerId, ...orderData } = createDto;
     const productIds = [];
+    console.log(orderData);
 
     orderData.products.forEach((product) => {
       productIds.push(product.productId);
@@ -50,7 +51,6 @@ export class OrderService {
     if (!products || products.length === 0) {
       throw new NotFoundException('No products found for the provided IDs');
     }
-
     const newOrder = this.orderRepository.create({
       ...orderData,
       customer,
@@ -146,13 +146,13 @@ export class OrderService {
         status === OrderStatus.ORDERED &&
         order.status !== OrderStatus.ORDERED
       ) {
+        console.log(`Decreasing materials for order: ${order.id}`);
         await this.adjustMaterialQuantities(order, 'decrease');
-      } else if (
-        status === OrderStatus.CANCELLATION &&
-        order.status === OrderStatus.ORDERED
-      ) {
+      } else if (status === OrderStatus.CANCELLATION) {
+        console.log(`Increasing materials for order: ${order.id}`);
         await this.adjustMaterialQuantities(order, 'increase');
       }
+
       order.status = status;
     }
 

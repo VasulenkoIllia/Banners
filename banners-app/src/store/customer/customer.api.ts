@@ -46,7 +46,7 @@ export const customerApi = createApi({
             query: (id) => `admin/customer/${id}`,
             providesTags: (id) => [{type: 'Customer', id}],
         }),
-
+        
         updateCustomer: builder.mutation({
             query: ({id, ...data}) => ({
                 url: `admin/customer/${id}/update`,

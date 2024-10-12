@@ -5,6 +5,7 @@ import {materialApi} from "./material/material.api";
 import {customerApi} from "./customer/customer.api";
 import {productApi} from "./product/product.api";
 import {orderApi} from "./order/order.api";
+import {expenseApi} from "./expense/expense.api";
 
 
 export const store = configureStore({
@@ -14,6 +15,7 @@ export const store = configureStore({
         [customerApi.reducerPath]: customerApi.reducer,
         [productApi.reducerPath]: productApi.reducer,
         [orderApi.reducerPath]: orderApi.reducer,
+        [expenseApi.reducerPath]: expenseApi.reducer,
     },
 
     middleware: (getDefaultMiddleware) =>
@@ -23,6 +25,7 @@ export const store = configureStore({
             customerApi.middleware,
             productApi.middleware,
             orderApi.middleware,
+            expenseApi.middleware,
         ),
 })
 

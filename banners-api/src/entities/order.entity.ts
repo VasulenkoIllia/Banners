@@ -41,6 +41,9 @@ export class OrderEntity {
   @Column({ type: 'varchar', length: 255 })
   public address: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  public country: string;
+
   @CreateDateColumn({ type: 'timestamp' })
   public startDate: Date;
 
@@ -74,11 +77,11 @@ export class OrderEntity {
       const productCostPrice = parseFloat(String(product.costPrice)) || 0;
       return total + productCostPrice;
     }, 0);
-
-    this.salePrice = this.products.reduce((total, product) => {
-      const productSalePrice = parseFloat(String(product.salePrice)) || 0;
-      return total + productSalePrice;
-    }, 0);
+    //
+    // this.salePrice = this.products.reduce((total, product) => {
+    //   const productSalePrice = parseFloat(String(product.salePrice)) || 0;
+    //   return total + productSalePrice;
+    // }, 0);
 
     this.profit = this.salePrice - this.costPrice;
   }
