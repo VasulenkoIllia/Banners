@@ -21,19 +21,10 @@ export class OrderService {
   ) {}
 
   async createOrder(createDto: any) {
-    const { customerId, ...orderData } = createDto;
-    const productIds = [];
-    console.log(orderData);
+    const { customerId, products, ...orderData } = createDto;
 
-    orderData.products.forEach((product) => {
-      productIds.push(product.productId);
-
-      product.costPrice = parseFloat(product.costPrice) || 0;
-      product.salePrice = parseFloat(product.salePrice) || 0;
-    });
-
-    if (!Array.isArray(productIds) || productIds.length === 0) {
-      throw new Error('Invalid product IDs. Expected an array of product IDs.');
+    if (!Array.isArray(products) || products.length === 0) {
+      throw new Error('Invalid product list.');
     }
 
     const customer = await this.customerRepository.findOne({
@@ -43,33 +34,37 @@ export class OrderService {
       throw new NotFoundException(`Customer with id ${customerId} not found`);
     }
 
-    const products = await this.productRepository.find({
-      where: { id: In(productIds) },
-      relations: ['productMaterials'],
+    const productEntities = await this.productRepository.find({
+      where: { id: In(products.map((p) => p.productId)) },
     });
 
-    if (!products || products.length === 0) {
+    if (!productEntities.length) {
       throw new NotFoundException('No products found for the provided IDs');
     }
+
     const newOrder = this.orderRepository.create({
       ...orderData,
       customer,
-      products,
+      products: productEntities,
     }) as unknown as OrderEntity;
 
     const savedOrder = await this.orderRepository.save(newOrder);
-
     await this.adjustMaterialQuantities(savedOrder, 'decrease');
-
     return savedOrder;
   }
 
   async findAllOrders(
     queryParams: any,
   ): Promise<{ orders: OrderEntity[]; total: number }> {
-    const skip = queryParams.skip || 0;
-    const take = queryParams.take || 20;
-
+    const {
+      startDate,
+      endDate,
+      skip = 0,
+      take = 20,
+      sortField,
+      sortOrder,
+      customer,
+    } = queryParams;
     const queryBuilder = this.orderRepository
       .createQueryBuilder('order')
       .leftJoinAndSelect('order.customer', 'customer')
@@ -77,30 +72,27 @@ export class OrderService {
       .skip(skip)
       .take(take);
 
-    if (queryParams.customer) {
-      queryBuilder.andWhere('customer.name ILIKE :customerName', {
-        customerName: `%${queryParams.customer}%`,
+    if (startDate && endDate) {
+      queryBuilder.andWhere('order.createdAt BETWEEN :startDate AND :endDate', {
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
       });
     }
 
-    if (queryParams.sortField && queryParams.sortOrder) {
-      const sortOrder = queryParams.sortOrder.toUpperCase();
+    if (customer) {
+      queryBuilder.andWhere('customer.name ILIKE :customerName', {
+        customerName: `%${customer}%`,
+      });
+    }
 
-      if (queryParams.sortField === 'customer') {
-        queryBuilder.orderBy('customer.name', sortOrder);
-      } else if (queryParams.sortField === 'completionDate') {
-        queryBuilder.orderBy('order.completionDate', sortOrder);
-      } else {
-        queryBuilder.orderBy(`order.${queryParams.sortField}`, sortOrder);
-      }
+    if (sortField && sortOrder) {
+      queryBuilder.orderBy(`order.${sortField}`, sortOrder.toUpperCase());
+    } else {
+      queryBuilder.orderBy('order.createdAt', 'ASC');
     }
 
     const [orders, total] = await queryBuilder.getManyAndCount();
-
-    return {
-      orders,
-      total,
-    };
+    return { orders, total };
   }
 
   async findOneOrder(id: number): Promise<OrderEntity> {
@@ -118,7 +110,7 @@ export class OrderService {
 
   async updateOrder(id: number, updateDto: any): Promise<OrderEntity> {
     const order = await this.findOneOrder(id);
-    const { customerId, productIds, status, ...orderData } = updateDto;
+    const { customerId, products, status, ...orderData } = updateDto;
 
     if (customerId) {
       const customer = await this.customerRepository.findOne({
@@ -130,29 +122,25 @@ export class OrderService {
       order.customer = customer;
     }
 
-    if (productIds) {
-      const products = await this.productRepository.find({
-        where: { id: In(productIds) },
-        relations: ['productMaterials'],
+    if (products) {
+      const productEntities = await this.productRepository.find({
+        where: { id: In(products.map((p) => p.productId)) },
       });
-      if (!products || products.length === 0) {
+      if (!productEntities.length) {
         throw new NotFoundException('No products found for the provided IDs');
       }
-      order.products = products;
+      order.products = productEntities;
     }
 
     if (status && status !== order.status) {
       if (
-        status === OrderStatus.ORDERED &&
-        order.status !== OrderStatus.ORDERED
+        status === OrderStatus.COMPLETED &&
+        order.status !== OrderStatus.COMPLETED
       ) {
-        console.log(`Decreasing materials for order: ${order.id}`);
         await this.adjustMaterialQuantities(order, 'decrease');
       } else if (status === OrderStatus.CANCELLATION) {
-        console.log(`Increasing materials for order: ${order.id}`);
         await this.adjustMaterialQuantities(order, 'increase');
       }
-
       order.status = status;
     }
 
@@ -165,7 +153,6 @@ export class OrderService {
     if (order.status !== OrderStatus.CANCELLATION) {
       await this.adjustMaterialQuantities(order, 'increase');
     }
-
     await this.orderRepository.remove(order);
   }
 
@@ -181,17 +168,10 @@ export class OrderService {
     });
 
     for (const product of products) {
-      if (!Array.isArray(product.productMaterials)) {
-        throw new Error(
-          `ProductMaterials for product ${product.id} is not an array or is undefined`,
-        );
-      }
-
       for (const productMaterial of product.productMaterials) {
         const material = await this.materialRepository.findOne({
           where: { id: productMaterial.material.id },
         });
-
         if (!material) {
           throw new NotFoundException(
             `Material with id ${productMaterial.material.id} not found`,
@@ -199,8 +179,6 @@ export class OrderService {
         }
 
         const quantityToAdjust = parseFloat(String(productMaterial.quantity));
-        console.log(quantityToAdjust);
-
         if (isNaN(quantityToAdjust)) {
           throw new Error(
             `Invalid quantity for productMaterial ${productMaterial.id}: ${productMaterial.quantity}`,
@@ -208,16 +186,14 @@ export class OrderService {
         }
 
         if (action === 'decrease') {
-          const materialQuantity = +material.quantity;
-          material.quantity = materialQuantity - +quantityToAdjust;
+          material.quantity -= quantityToAdjust;
           if (material.quantity < 0) {
             throw new Error(
               `Insufficient stock for material: ${material.name}`,
             );
           }
-        } else if (action === 'increase') {
-          const materialQuantity = +material.quantity;
-          material.quantity = +quantityToAdjust + materialQuantity;
+        } else {
+          material.quantity += quantityToAdjust;
         }
 
         await this.materialRepository.save(material);

@@ -1,7 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import {
+  Between,
+  FindOptionsOrder,
+  FindOptionsWhere,
+  ILike,
+  Repository,
+} from 'typeorm';
 import { MaterialEntity } from '../../entities/material.entity';
-import { FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { ProductService } from '../product/product.service';
 
 @Injectable()
@@ -18,19 +24,15 @@ export class MaterialService {
   }
 
   async findOneMaterial(id: number) {
-    const product = await this.materialRepository.findOne({ where: { id } });
-    if (!product) {
-      throw new NotFoundException(`Material with id ${id} not found`);
-    }
-    return product;
-  }
-
-  async addMaterialQuantity(id: number, addQuantity: number, newPrice: number) {
     const material = await this.materialRepository.findOne({ where: { id } });
-
     if (!material) {
       throw new NotFoundException(`Material with id ${id} not found`);
     }
+    return material;
+  }
+
+  async addMaterialQuantity(id: number, addQuantity: number, newPrice: number) {
+    const material = await this.findOneMaterial(id);
 
     material.quantity = Number(material.quantity) + Number(addQuantity);
 
@@ -50,7 +52,7 @@ export class MaterialService {
   }
 
   async updateMaterial(id: number, updateDto: any) {
-    const material = await this.materialRepository.findOne({ where: { id } });
+    const material = await this.findOneMaterial(id);
     if (!material) {
       throw new NotFoundException(`Material with id ${id} not found`);
     }
@@ -58,7 +60,7 @@ export class MaterialService {
   }
 
   async removeMaterial(id: number) {
-    const material = await this.materialRepository.findOne({ where: { id } });
+    const material = await this.findOneMaterial(id);
     if (!material) {
       throw new NotFoundException(`Material with id ${id} not found`);
     }
@@ -77,12 +79,19 @@ export class MaterialService {
       params.measurementUnit = queryParams.measurementUnit;
     }
 
+    if (queryParams.startDate && queryParams.endDate) {
+      params.createdAt = Between(
+        new Date(queryParams.startDate),
+        new Date(queryParams.endDate),
+      );
+    }
+
     const skip = queryParams.skip ? parseInt(queryParams.skip, 10) : 0;
     const take = queryParams.take ? parseInt(queryParams.take, 10) : 20;
 
-    const order = queryParams.sortField
-      ? { [queryParams.sortField]: queryParams.sortOrder || 'ASC' }
-      : {};
+    const order: FindOptionsOrder<MaterialEntity> = queryParams.sortField
+      ? { [queryParams.sortField]: queryParams.sortOrder as 'ASC' | 'DESC' }
+      : { createdAt: 'ASC' };
 
     const [materials, total] = await this.materialRepository.findAndCount({
       skip,

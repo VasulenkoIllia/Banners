@@ -10,6 +10,7 @@ import { ProductModule } from './components/product/product.module';
 import { OrderModule } from './components/order/order.module';
 import { ProductMaterialsModule } from './components/product_materials/product_materials.module';
 import { ExpenseModule } from './components/expense/expense.module';
+import { StatisticsModule } from './components/statistic/statistic.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ExpenseModule } from './components/expense/expense.module';
     OrderModule,
     ProductMaterialsModule,
     ExpenseModule,
+    StatisticsModule,
   ],
 })
 export class AppModule {}

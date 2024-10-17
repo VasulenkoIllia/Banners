@@ -27,10 +27,6 @@ const menuItems = [
         key: '/expenses',
         label: 'Expense',
     },
-    {
-        key: '/levels',
-        label: 'Levels',
-    },
 ];
 
 export default function AppLayout() {

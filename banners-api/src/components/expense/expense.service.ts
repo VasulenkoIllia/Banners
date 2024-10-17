@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, ILike, Repository } from 'typeorm';
+import { Between, FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { ExpenseEntity } from '../../entities/expense.entity';
 
 @Injectable()
@@ -23,40 +23,46 @@ export class ExpenseService {
     return expense;
   }
 
+  async findAllExpenses(
+    queryParams: any,
+  ): Promise<{ expenses: ExpenseEntity[]; total: number }> {
+    const {
+      startDate,
+      endDate,
+      search,
+      skip = 0,
+      take = 20,
+      sortField,
+      sortOrder,
+    } = queryParams;
+    const whereClause: FindOptionsWhere<ExpenseEntity> = {};
+
+    if (startDate && endDate) {
+      whereClause.createdAt = Between(new Date(startDate), new Date(endDate));
+    }
+
+    if (search) {
+      whereClause.name = ILike(`%${search}%`);
+    }
+
+    const [expenses, total] = await this.expenseRepository.findAndCount({
+      where: whereClause,
+      skip,
+      take,
+      order: sortField
+        ? { [sortField]: sortOrder || 'ASC' }
+        : { createdAt: 'ASC' },
+    });
+
+    return { expenses, total };
+  }
+
   async removeExpense(id: number) {
-    const expense = await this.expenseRepository.findOne({ where: { id } });
+    const expense = await this.findOneExpense(id);
     if (!expense) {
       throw new NotFoundException(`Expense with id ${id} not found`);
     }
-    await this.expenseRepository.delete(id);
-    return { message: 'expense successfully deleted' };
-  }
-
-  async findAllExpenses(queryParams: Record<string, any> = {}): Promise<any> {
-    const params: FindOptionsWhere<ExpenseEntity> = {};
-
-    // Implement search functionality on the name field
-    if (queryParams.search) {
-      params.name = ILike(`%${queryParams.search}%`);
-    }
-
-    const skip = queryParams.skip ? parseInt(queryParams.skip, 10) : 0;
-    const take = queryParams.take ? parseInt(queryParams.take, 10) : 20;
-
-    const order = queryParams.sortField
-      ? { [queryParams.sortField]: queryParams.sortOrder || 'ASC' }
-      : {};
-
-    const [expenses, total] = await this.expenseRepository.findAndCount({
-      skip,
-      take,
-      where: params,
-      order,
-    });
-
-    return {
-      expenses,
-      total,
-    };
+    await this.expenseRepository.remove(expense);
+    return { message: 'Expense successfully deleted' };
   }
 }

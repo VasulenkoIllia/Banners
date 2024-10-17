@@ -17,6 +17,7 @@ import CustomerInfo from "./customer/customer-info";
 import Expenses from "./expense/expenses";
 import ExpenseCreate from "./expense/expense-create";
 import ExpenseInfo from "./expense/expense-info";
+import {Dashboard} from "./statistic/statistics";
 
 
 export const router = createBrowserRouter([
@@ -119,6 +120,10 @@ export const router = createBrowserRouter([
             {
                 path: "/expenses/:id/info",
                 element: <ExpenseInfo/>,
+            },
+            {
+                path: "/",
+                element: <Dashboard/>,
             },
 
 
